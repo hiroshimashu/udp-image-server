@@ -27,7 +27,6 @@ def send_packet_chunk(chunk):
     SOC.sendto(chunk, (ADDR, PORT))
     return
 
-
 def compress_image(img):
     """
     Encode jpeg image and return compressed binary image
@@ -42,16 +41,25 @@ def compress_image(img):
     dat = encimg.tobytes()
     return dat
 
+def transform_from_byte_to_string(data_in_byte):
+    data_in_byte_string = str(data_in_byte)
+    return data_in_byte_string
+
 def run():
     img = cv2.imread("image/4k_image_sample.jpeg")
     compressed_image = compress_image(img)
-    packet_size = get_packet_size(compressed_image)
+    data_in_byte_string = transform_from_byte_to_string(compressed_image)
+    packet_size = get_packet_size(data_in_byte_string)
+    
+    print("Packet size: ", packet_size)
     chunk_num = calculate_chunk_num(packet_size)
+    print("Chunk num: ", chunk_num)
     
     pos_start = 0
     while chunk_num:
         pos_end = min(packet_size, pos_start + MAX_IMAGE_DGRAM)
         packet_chunk = create_packet_chunk(compressed_image, chunk_num, pos_start, pos_end)
+        print("Packet chunk: ", packet_chunk)
         send_packet_chunk(packet_chunk)
         pos_start = pos_end
         chunk_num -= 1
